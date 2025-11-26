@@ -3,12 +3,14 @@ from flask_login import LoginManager, UserMixin, login_required, login_user, log
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-
+import os
 
 load_dotenv() #Reads from .env 
+secret_key = os.getenv("SECRET_KEY")
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ZekeFinalBlog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -31,7 +33,7 @@ with app.app_context():
 
 login_manager = LoginManager() #part of flask_login; allows logins to work with code
 login_manager.login_view = "login" # return to login if authentication fails
-login_manager.refresh_view = "login" # This does the same as code above, but when session expires.
+login_manager.refresh_view = "login" # This does the same as code above, but when session expires. Redundant.
 login_manager.init_app(app) # Configure for login
 
 login_manager.login_message = "To see this page, please log in or create an account."
@@ -39,7 +41,7 @@ login_manager.login_message = "To see this page, please log in or create an acco
 @login_manager.user_loader #Find correct user
 def load_user(UserId): #Passing arbitrary argument
     #Database lookup logic to query for UserId
-    return User.get(UserId)
+    return User.get(int(UserId))
 
 @app.route('/') # This routejust points to the home route below it
 def mainpage():
@@ -118,3 +120,8 @@ def logout():
 @app.route('/home/post') # This route marks the start of the site's actual pages.
 def home_post():
     pass
+
+@app.route('/home/profile') # Try to only show some routes, including this one, to logged on users
+@login_required #If the user isn't logged in, then redirect ot login page specified earlier 
+def home_profile():
+    return render_template("profile.html")

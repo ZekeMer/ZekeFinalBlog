@@ -1,3 +1,7 @@
 .error { color: red}
 
+.topnav {color: lightgreen}
+
+/* .topnav a {} This refers to the a elements found inside .topnav */
+
 h1 {color: darkgreen}
