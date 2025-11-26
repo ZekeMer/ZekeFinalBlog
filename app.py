@@ -18,7 +18,8 @@ class Blog(db.Model):
     BlogId = db.Column(db.Integer, primary_key = True)
     BlogTitle = db.Column(db.String(60), nullable = False)
     BlogAuthor = db.Column(db.String(40), nullable = False)
-    post_time = db.Column(db.DateTime, default = datetime.now(timezone.utc))
+    PostTime = db.Column(db.DateTime, default = datetime.now(timezone.utc))
+    Comment = db.Column(db.String(250), nullable = False)
 
 class User(db.Model, UserMixin):
     UserId = db.Column(db.Integer, primary_key = True)
@@ -30,6 +31,7 @@ with app.app_context():
 
 login_manager = LoginManager() #part of flask_login; allows logins to work with code
 login_manager.login_view = "login" # return to login if authentication fails
+login_manager.refresh_view = "login" # This does the same as code above, but when session expires.
 login_manager.init_app(app) # Configure for login
 
 login_manager.login_message = "To see this page, please log in or create an account."
@@ -39,18 +41,19 @@ def load_user(UserId): #Passing arbitrary argument
     #Database lookup logic to query for UserId
     return User.get(UserId)
 
-@app.route('/')
+@app.route('/') # This routejust points to the home route below it
 def mainpage():
     return redirect(url_for("home"))
 
-@app.route('/home') #homepage refers to blog
+@app.route('/home') 
 def home():
     return render_template("home.html")
 
-@app.route('/admin')
+@app.route('/admin') # HTML page for route to be added.
 def admin():
-    pass
-    # return
+    blog = Blog.query.all()
+    user = User.query.all()
+    return render_template("admin_home.html", blog = blog, user = user)
 
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
@@ -107,10 +110,11 @@ def login():
     return render_template("login.html")
 
 @app.route('/logout')
+@login_required # Require login to take action or see page - In this case, the user cannot logout if they don't have an account
 def logout():
     logout_user()
     return redirect(url_for('home.html')) # This is a guest, figure it out!
-   
-    
 
-
+@app.route('/home/post') # This route marks the start of the site's actual pages.
+def home_post():
+    pass

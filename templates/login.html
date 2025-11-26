@@ -7,6 +7,30 @@
 </head>
 <body>
    
+   <h1>Login to Tome Blog</h1>
+   <a href = "{{ url_for('home') }}"> Browse as Guest. </a>
+
+    {# {% if error %}
+        <p class = "error"> {{ *insert name of error* }} </p>
+    {% endif %} #}
+
+
+    <form action="" method="POST">
+
+        <div>
+            <label for = "UserName"> Username : </label>
+            <input type="text" name="UserName" id = "UserName" required>
+        </div>
+        <div>
+            <label for = "Password"> Password : </label>
+            <input type = "text" name = "Password" id = "Password" required>
+        </div>
+
+        <div>
+            <button type = "submit"> Log in </button>
+        </div>
+    
+    </form>
 
 </body>
 </html>

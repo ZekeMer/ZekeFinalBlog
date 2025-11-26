@@ -8,6 +8,7 @@
 <body>
     
     <h1>Signup for Tome Blog</h1>
+    <a href = "{{ url_for('home') }}"> Browse as Guest. </a>
 
     {# {% if error %}
         <p class = "error"> {{ *insert name of error* }} </p>
@@ -18,7 +19,7 @@
 
         <div>
             <label for = "UserName"> Username : </label>
-            <knput type="text" name="UserName" id = "UserName" required>
+            <input type="text" name="UserName" id = "UserName" required>
         </div>
         <div>
             <label for = "Password"> Password : </label>
@@ -29,6 +30,14 @@
             <input type = "text" name = "Password" id = "Password" required>
         </div>
     
+
+        <div>
+            <button type = "submit"> Sign up </button>
+        </div>
+
+        <div>
+            <p>Already a member? </p> <a href = "{{ url_for('login') }}"> Log in </a> {# Figure out how to get on the same line later #}
+        </div>
     
     </form>
 
