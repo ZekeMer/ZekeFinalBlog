@@ -4,20 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tome Blog</title>
+    <link rel="stylesheet" type ="text/css" href="{{ url_for('static', filename = 'style.css')}}">
 </head>
 <body>
     
 
     <div class="topnav">
-        <div class="topnav-right">
-            <a href = "{{ url_for('home') }}">Home</a> |
-            <a href = "{{ url_for('login') }}"> Log in </a> | 
-            <a href = "{{ url_for('signup') }}"> Sign up </a>
-        </div>
+        
+        <!-- Everyone gets these  -->
+        <a href = "{{ url_for('home') }}">Home</a>
+        <a href = "{{ url_for('home_profile') }}" class = "split"> Profile </a>
 
-        <div class="left-links">
-            <a href = "{{ url_for('home_profile') }}"> Profile </a>
-        </div>
+        <!-- Everyone who is signed in gets these -->
+        {% if current_user.is_authenticated %}
+
+            <a href = "{{ url_for('logout') }}"> Log out</a>
+
+        {% else %}
+
+            <!-- Only those who are anonymous guests get these -->
+            <a href = "{{ url_for('login') }}"> Log in </a>
+            <a href = "{{ url_for('signup') }}"> Sign up </a>
+
+        {% endif %}
+        
     </div>
 
 
@@ -25,6 +35,17 @@
     <hr>
 
     {% block content %} {% endblock %}
+    
+    {# Flash messages across all base.html extensions #}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div style="background: rgba(199, 97, 1, 0.938); padding: 15px;">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
 </body>
 </html>

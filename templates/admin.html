@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1> This is the admin page. If you aren't an admin, get outta here! </h1>
+
+<table class = "table table=striped" border = "2">
+    <tr>
+        <th>UserID</th>
+        <th>Username</th>
+        <th>password</th>
+        <th>Administrator</th>
+    </tr>
+    {% for user in user %}
+    <tr>
+        <td>{{ User.UserId }}</td>
+        <td>{{ User.UserName }}</td>
+        <td>{{ User.Password }}</td>
+        <td>{{ User.Is_Admin }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

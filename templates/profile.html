@@ -1,14 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tome Blog Profile</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
 
 
-    <p>This is a profile page</p>
-    
-</body>
-</html>
+{% if current_user.Is_Admin %}
+
+<p> Username: <span class = "admin"> {{ current_user.UserName }} </span> </p>
+
+{% else %}
+
+<p>  Username: {{ current_user.UserName }}</p>
+
+{% endif %}
+
+<!-- Find a way to hide and prevent shoulder surfing -->
+<p> Password: {{current_user.Password}} </p> 
+
+
+{% endblock %}

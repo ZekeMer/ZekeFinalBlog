@@ -1,7 +1,37 @@
-.error { color: red}
+.error { color: red; }
 
-.topnav {color: lightgreen}
+.admin { 
+    color: darkgreen;
+    font-weight: bolder;
+}
 
-/* .topnav a {} This refers to the a elements found inside .topnav */
+.topnav {
+    background-color: darkolivegreen;
+    overflow: hidden
+}
+
+.topnav a {
+    float: left;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    text-decoration: none ;
+    font-size: 15px;
+} /* This refers to the a elements found inside .topnav */
+
+.topnav a:hover {
+    background-color: white ;
+    color: black;
+}
+
+.topnav a.split {
+    float: right;
+    background-color: darkgreen;
+    color: white;
+}
+.topnav a.split:hover {
+    background-color: white;
+    color: black;
+}
 
 h1 {color: darkgreen}

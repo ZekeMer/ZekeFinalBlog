@@ -7,7 +7,7 @@
 </head>
 <body>
     
-    <h1>Signup for Tome Blog</h1>
+    <h1>Sign up for Tome Blog</h1>
     <a href = "{{ url_for('home') }}"> Browse as Guest. </a>
 
     {# {% if error %}
@@ -38,6 +38,16 @@
         <div>
             <p>Already a member? </p> <a href = "{{ url_for('login') }}"> Log in </a> {# Figure out how to get on the same line later #}
         </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div style="background: rgba(199, 97, 1, 0.938); padding: 15px;">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
     
     </form>
 
