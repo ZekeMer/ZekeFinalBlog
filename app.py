@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ZekeFinalBlog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes = 45)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours = 1)
 
 db = SQLAlchemy(app)
 
@@ -38,6 +38,7 @@ class User(db.Model, UserMixin):
 
 with app.app_context():
     db.create_all()
+
 
 login_manager = LoginManager() #part of flask_login; allows logins to work with code
 login_manager.init_app(app) # Configure for login
@@ -83,12 +84,28 @@ def admin():
     users = User.query.all()
     return render_template("admin.html", blogs = blogs, users = users) # When making a list of the users, DON'T store in same name to avoid confusing Jinja
 
+@app.route('/admin/deleteUser/<int:userId>', methods = ['POST'])
+@fresh_login_required
+def admin_deleteUser(userId):
+    userDelete = User.query.get_or_404(userId)
+
+    if (userDelete.Is_Admin):
+        flash("You cannot delete admin accounts. Direct Delete through command.")
+        return redirect(url_for('admin'))
+
+    db.session.delete(userDelete)
+    db.session.commit()
+    flash(f"Successfully deleted user \"{userDelete.UserName}\"")
+
+    return redirect(url_for('admin'))
+
+
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
     if request.method == "POST":
-        username = request.form.get("UserName").strip()
+        username = request.form.get("username").strip()
         password = request.form.get("Password").strip()
-        confirmPassword = request.form.get("Password").strip()
+        confirmPassword = request.form.get("confirmPassword").strip()
 
         if len(username) < 2:
             flash("The username needs to be at least 2 characters!")
@@ -146,7 +163,11 @@ def logout():
     logout_user()
     return redirect(url_for('login')) # This is a guest, figure it out!
 
-@app.route('/home/post') # This route marks the start of the site's actual pages. Have a user make a post
+@app.route('/home/blog')
+def home_blog():
+    pass
+
+@app.route('/home/postBlog') # Post blog
 def home_post():
     pass
 
