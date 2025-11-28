@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user, fresh_login_required
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import os
 
@@ -13,6 +13,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ZekeFinalBlog.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes = 45)
 
 db = SQLAlchemy(app)
 
@@ -39,11 +40,11 @@ with app.app_context():
     db.create_all()
 
 login_manager = LoginManager() #part of flask_login; allows logins to work with code
+login_manager.init_app(app) # Configure for login
 login_manager.login_view = "login" # return to login if authentication fails
 login_manager.refresh_view = "login" # This does the same as code above, but when session expires. Redundant.
-login_manager.init_app(app) # Configure for login
-
-login_manager.login_message = "To see page, please log in or create an account."
+login_manager.needs_refresh_message = "Your session has expired. Log in again. Or don't I guess."
+login_manager.login_message = "To see page, please log in or create an account." # Redirect to login_view define above
 
 @login_manager.user_loader #Find correct user
 def load_user(UserId): #Passing arbitrary argument
@@ -66,7 +67,7 @@ def create_admin():
 
     print(f"Admin user {user_name} initiated")
 
-@app.route('/') # This routejust points to the home route below it
+@app.route('/') # This route just points to the home route below it
 def mainpage():
     return redirect(url_for("home"))
 
@@ -75,11 +76,12 @@ def home():
     # blog = Blog.query.all()
     return render_template("home.html")
 
-# @app.route('/admin') # HTML page for route to be added.
-# def admin():
-    # blog = Blog.query.all()
-    # user = User.query.all()
-    # return render_template("admin.html", blog = blog, user = user)
+@app.route('/admin') # HTML page for route to be added.
+@fresh_login_required #Sees if logged in and if session is fresh
+def admin():
+    blogs = Blog.query.all()
+    users = User.query.all()
+    return render_template("admin.html", blogs = blogs, users = users) # When making a list of the users, DON'T store in same name to avoid confusing Jinja
 
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
@@ -107,7 +109,6 @@ def signup():
                     new_user = User(UserName = username, Password = password, Is_Admin = False) # This should be set to false forever.
                     db.session.add(new_user)
                     db.session.commit()
-                    login_user(new_user, remember = False, fresh = True) # include the user object, remember after session expires? = NO, this is a fresh sign in.
                     flash("Sign up successful. Log in.")
                     return redirect(url_for('login')) # GO TO THE LOGIN PAGE and sign in with the credentials they just made. 
                 except Exception as e: 
@@ -124,9 +125,9 @@ def login():
         username = request.form.get("UserName").strip()
         password = request.form.get("Password").strip()
 
-        userFound = User.query.filter(User.UserName == username).first() #Proper way to check
+        userFound = User.query.filter(User.UserName == username).first() # Store the entered username as userFound here
         if userFound:
-            if userFound.Password == password: 
+            if userFound.Password == password: # use stored variable of username and then get the password.
                 login_user(userFound, remember = False, fresh = True)
                 return redirect(url_for('home'))
             else:
@@ -150,6 +151,7 @@ def home_post():
     pass
 
 @app.route('/home/profile') # Try to only show some routes, including this one, to logged on users
-@login_required #If the user isn't logged in, then redirect ot login page specified earlier 
+@login_required #If the user isn't logged in, then redirect ot login page specified earlier
+@fresh_login_required # Figure this out eventually - Redundant right now as it already checks the log in
 def home_profile():
     return render_template("profile.html")

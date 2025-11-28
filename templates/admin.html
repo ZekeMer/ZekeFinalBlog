@@ -4,6 +4,8 @@
 
 <h1> This is the admin page. If you aren't an admin, get outta here! </h1>
 
+<br>
+
 <table class = "table table=striped" border = "2">
     <tr>
         <th>UserID</th>
@@ -11,12 +13,12 @@
         <th>password</th>
         <th>Administrator</th>
     </tr>
-    {% for user in user %}
+    {% for user in users %} <!-- What is going on here? Fix -->
     <tr>
-        <td>{{ User.UserId }}</td>
-        <td>{{ User.UserName }}</td>
-        <td>{{ User.Password }}</td>
-        <td>{{ User.Is_Admin }}</td>
+        <td>{{ user.UserId }}</td>
+        <td>{{ user.UserName }}</td>
+        <td>{{ user.Password }}</td>
+        <td>{{ user.Is_Admin }}</td>
     </tr>
     {% endfor %}
 </table>

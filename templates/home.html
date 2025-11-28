@@ -4,15 +4,15 @@
 
 {% if current_user.is_anonymous %}
 
-<h2>Hi there!</h2>
+    <h2>Hi there!</h2>
 
 {% elif current_user.Is_Admin %}
 
-<h2>Hi there <span class = "admin"> {{ current_user.UserName }} </span> !</h2>
+    <h2>Hi there <span class = "admin"> {{ current_user.UserName }} </span> !</h2>
 
 {% else %}
 
-<h2>Hi there {{ current_user.UserName }}!</h2>
+    <h2>Hi there {{ current_user.UserName }}!</h2>
 
 {% endif %}
 

@@ -1,3 +1,4 @@
+/* Denote special text */
 .error { color: red; }
 
 .admin { 
@@ -5,6 +6,7 @@
     font-weight: bolder;
 }
 
+/* navigation bar */
 .topnav {
     background-color: darkolivegreen;
     overflow: hidden
@@ -34,4 +36,5 @@
     color: black;
 }
 
+/* Base text styling */
 h1 {color: darkgreen}
