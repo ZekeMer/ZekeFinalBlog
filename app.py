@@ -19,6 +19,8 @@ db = SQLAlchemy(app)
 
 class Blog(db.Model): # user.blog --> blogs  user.Author --> author
     BlogId = db.Column(db.Integer, primary_key = True)
+    Book = db.Column(db.String(60), nullable = False)
+    BookAuthor = db.Column(db.String(40), nullable = False)
     BlogTitle = db.Column(db.String(60), nullable = False)
     BlogAuthor = db.Column(db.String(40), nullable = False)
     InitalComment = db.Column(db.String(250), nullable = False)
@@ -31,7 +33,7 @@ class User(db.Model, UserMixin):
     UserName = db.Column(db.String(20), nullable = False, unique = True)
     Password = db.Column(db.String(200), nullable = False)
     Is_Admin = db.Column(db.Boolean, nullable=False) # Is this user an admin? Try to get this to work via normal sign up and jsut check permissions before sensitive actions.
-    blogs = db.relationship('Blog', backref = "Author", lazy = True) # Check backref len(user.blogs)
+    blogs = db.relationship('Blog', backref = "Author", lazy = True) # backref Auhtor refers to Blog author 
 
     def get_id(self):
         return str(self.UserId)
@@ -68,6 +70,8 @@ def create_admin():
 
     print(f"Admin user {user_name} initiated")
 
+# Begin Routes
+
 @app.route('/') # This route just points to the home route below it
 def mainpage():
     return redirect(url_for("home"))
@@ -90,7 +94,7 @@ def admin_deleteUser(userId):
     userDelete = User.query.get_or_404(userId)
 
     if (userDelete.Is_Admin):
-        flash("You cannot delete admin accounts. Direct Delete through command.")
+        flash("You cannot delete admin accounts here. Direct Delete through command.")
         return redirect(url_for('admin'))
 
     db.session.delete(userDelete)
@@ -99,11 +103,10 @@ def admin_deleteUser(userId):
 
     return redirect(url_for('admin'))
 
-
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
     if request.method == "POST":
-        username = request.form.get("username").strip()
+        username = request.form.get("UserName").strip()
         password = request.form.get("Password").strip()
         confirmPassword = request.form.get("confirmPassword").strip()
 
@@ -161,18 +164,47 @@ def login():
 @login_required # Require login to take action or see page - In this case, the user cannot logout if they don't have an account
 def logout():
     logout_user()
-    return redirect(url_for('login')) # This is a guest, figure it out!
+    return redirect(url_for('login')) 
 
-@app.route('/home/blog')
-def home_blog():
+@app.route('/home/createBlog', methods = ['GET', 'POST'])
+@fresh_login_required # Check login status, check freshness of login
+def home_createBlog():
+    if request.method == "POST":
+        blogTitle = request.form.get("BlogTitle").strip()
+        initalComment = request.form.get("InitialComment").strip()
+        bookTitle = request.form.get("Book").strip()
+        bookAuthor = request.form.get("BookAuthor", "").strip()
+
+        if not blogTitle or not initalComment or not bookTitle:
+            postError = "You must fill in all required fields!"
+            return render_template('createBlog.html', postError = postError)
+        
+        try:
+            new_blog = Blog(BlogTitle = blogTitle, 
+                        BlogAuthor = current_user.UserName, 
+                        InitialComment = initalComment, 
+                        Book = bookTitle,
+                        BookAuthor = bookAuthor, 
+                        UserId = current_user.UserId)
+            db.session.add(new_blog)
+            db.session.commit()
+            flash("Tome added to blog collection successfully!")
+        except Exception as e:
+            db.session.rollback()
+            newBlogError = "There was an error creating your new blog. Try again." 
+            return render_template("createBlog.html", newBlogError = newBlogError)
+        
+        return render_template('home_postBlog.html')
+    
+    return render_template("createBlog.html")
+
+
+@app.route('/home/postBlog', methods = ['GET', 'POST']) # Post blog
+def home_postBlog():
     pass
-
-@app.route('/home/postBlog') # Post blog
-def home_post():
-    pass
-
+    
 @app.route('/home/profile') # Try to only show some routes, including this one, to logged on users
-@login_required #If the user isn't logged in, then redirect ot login page specified earlier
+#If the user isn't logged in, then redirect ot login page specified earlier
 @fresh_login_required # Figure this out eventually - Redundant right now as it already checks the log in
 def home_profile():
     return render_template("profile.html")

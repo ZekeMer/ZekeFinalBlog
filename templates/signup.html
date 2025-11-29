@@ -10,16 +10,16 @@
     <h1>Sign up for Tome Blog</h1>
     <a href = "{{ url_for('home') }}"> Browse as Guest. </a>
 
-    {# {% if signUpError %}
+    {% if signUpError %}
         <p class = "error"> {{ signUpError }} </p>
-    {% endif %} #}
+    {% endif %}
 
 
     <form action="" method="POST">
 
         <div>
             <label for = "UserName"> Username : </label>
-            <input type="text" name="username" id = "username" required>
+            <input type="text" name="UserName" id = "UserName" required>
         </div>
         <div>
             <label for = "Password"> Password : </label>

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Error Checking --> 
+{% if postError %}
+    <p class = "error"> {{ postError }} </p>
+{% elif newBlogError %}
+    <p class = "error"> {{ newBlogError }}</p>
+{% endif %}
+
+<h1> Post a new Tome!</h1>
+
+<form action ="" method = "POST">
+
+    <div>
+        <label for = "BlogTitle"> Title of Your Tome Post :*  </label>
+        <textarea name = "BlogTitle" id = "BlogTitle" rows = 2 required></textarea>
+    </div>
+
+    <div>
+        <label for = "Book"> Title of Book :* </label>
+        <input type = "text" name = "Book" id = "Book" required>
+    </div>
+
+    <div>
+        <label for = "BookAuthor"> Author of Book : </label>
+        <input type = "text" name = "BookAuthor" id = "BookAuthor">
+    </div>
+
+    <div>
+        <label for = "InitialComment"> Post your Thoughts on the Tome :* </label>
+        <textarea name = "InitialComment" id = "InitalComment" rows = 5 required></textarea>
+    </div>
+
+    <div>
+        <button type = "submit"> Post your Tome! </button>
+    </div>
+
+</form>
+
+{% endblock %}
