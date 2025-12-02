@@ -9,7 +9,7 @@
 /* navigation bar */
 .topnav {
     background-color: darkolivegreen;
-    overflow: hidden
+    overflow: hidden;
 }
 
 .topnav a { /* This refers to the a elements found inside .topnav */
@@ -37,4 +37,4 @@
 }
 
 /* Base text styling */
-h1 {color: darkgreen}
+h1 {color: darkgreen;}

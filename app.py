@@ -35,7 +35,7 @@ class Comment(db.Model):
     UserId = db.Column(db.Integer, db.ForeignKey('user.UserId'), nullable = False)
     BlogId = db.Column(db.Integer, db.ForeignKey('blog.BlogId'), nullable = False)
 
-class User(db.Model, UserMixin):
+class User(db.Model, UserMixin): # If a user is deleted; how is this handled? Many fields cannot be null. --> Go for Soft Delete?
     UserId = db.Column(db.Integer, primary_key = True)
     UserName = db.Column(db.String(20), nullable = False, unique = True)
     Password = db.Column(db.String(200), nullable = False)
@@ -66,7 +66,7 @@ def load_user(UserId): #Passing arbitrary argument
 def create_admin():
     # from werkzeug.security import generate_password_hash
     # import getpass
-    
+
     #Make an admin from the CLI (command line)
     user_name = input("Enter admin username: ") 
     pass_word = input("Enter admin password: ")
@@ -86,8 +86,7 @@ def mainpage():
 
 @app.route('/home') 
 def home():
-    blogs = Blog.query.all()
-    return render_template("home.html", blogs = blogs)
+    return render_template("home.html")
 
 @app.route('/admin')
 @fresh_login_required #Sees if logged in and if session is fresh
@@ -96,10 +95,10 @@ def admin():
     users = User.query.all()
     return render_template("admin.html", blogs = blogs, users = users) # When making a list of the users, DON'T store in same name to avoid confusing Jinja
 
-@app.route('/admin/deleteUser/<int:userId>', methods = ['POST'])
+@app.route('/admin/deleteUser/<int:id>', methods = ['POST'])
 @fresh_login_required
-def admin_deleteUser(userId):
-    userDelete = User.query.get_or_404(userId)
+def admin_deleteUser(id):
+    userDelete = User.query.get_or_404(id)
 
     if (userDelete.Is_Admin):
         flash("You cannot delete admin accounts here.")
@@ -177,20 +176,21 @@ def logout():
 @app.route('/home/createBlog', methods = ['GET', 'POST'])
 @fresh_login_required # Check login status, check freshness of login
 def home_createBlog():
+
     if request.method == "POST":
         blogTitle = request.form.get("BlogTitle").strip()
-        initalComment = request.form.get("InitialComment").strip()
+        initialComment = request.form.get("InitialComment").strip()
         bookTitle = request.form.get("Book").strip()
         bookAuthor = request.form.get("BookAuthor", "").strip() # Only input not required of the user
 
-        if not blogTitle or not initalComment or not bookTitle:
+        if not blogTitle or not initialComment or not bookTitle:
             postError = "You must fill in all required fields!"
             return render_template('createBlog.html', postError = postError)
         
         try:
             new_blog = Blog(BlogTitle = blogTitle, 
                 BlogAuthor = current_user.UserName, 
-                InitialComment = initalComment, 
+                InitialComment = initialComment, 
                 Book = bookTitle,
                 BookAuthor = bookAuthor, 
                 UserId = current_user.UserId)
@@ -203,14 +203,21 @@ def home_createBlog():
             newBlogError = "There was an error creating your new blog. Try again." 
             return render_template("createBlog.html", newBlogError = newBlogError)
         
-        return render_template('home_postBlog.html')
+        # return render_template('postBlog.html', new_blog = new_blog)
+        return redirect(url_for('home_blogs'))
     
     return render_template("createBlog.html")
 
+@app.route('/home/blogs', methods = ['GET', 'POST'])
+def home_blogs():
+    blogs = Blog.query.all()
+    return render_template('blogs.html', blogs = blogs)
 
-@app.route('/home/postBlog', methods = ['GET', 'POST']) # Post blog --> TO BE DONE 
-def home_postBlog():
-    pass
+@app.route('/home/blogs/<int:id>', methods = ['POST', 'GET']) # Use this to view each individual blog 
+# @fresh_login_required
+def home_selectBlogs(id):
+    getBlog = Blog.query.get_or_404(id)
+    return render_template('selectBlogs.html', getBlog = getBlog)
     
 @app.route('/home/profile') # Try to only show some routes, including this one, to logged on users
 #If the user isn't logged in, then redirect ot login page specified earlier

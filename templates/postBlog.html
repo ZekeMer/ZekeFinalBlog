@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2> Your Blog </h2>
+
+    <h1> {{ new_blog.blogTitle }} </h1>
+
+    <p> Tome Topic by: <strong> {{ new_blog.BlogAuthor }} </strong> </p> 
+    <p> Book: {{ new_blog.Book }} </p>
+    <p> Book Author: {{ new_blog.BookAuthor if new_blog.BookAuthor else "No Author provided."}} </p>
+    <p> {{ new_blog.InitialComment }} </p> 
+    <p> Posted at: {{ new_blog.PostTime }}  </p> 
+
+{# Solve Repeat Issue #}
+
+{% endblock %}

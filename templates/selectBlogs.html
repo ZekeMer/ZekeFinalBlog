@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1> {{ getBlog.BlogTitle }} </h1>
+
+    <p> Tome Topic by: <strong> {{ getBlog.BlogAuthor }} </strong> </p> <!-- Admin users should have differing coloring -->
+    <p> Book: {{ getBlog.Book }} </p>
+    <p> Book Author: {{ getBlog.BookAuthor }}</p>
+    <p> {{ getBlog.InitialComment }} </p> <!-- To hold its place, view on link click -->
+    <p> Posted at: {{ getBlog.PostTime }}  </p> <!-- Find a way to get rid of floats for time-->
+
+
+{% endblock %}
