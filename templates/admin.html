@@ -12,13 +12,13 @@
         <th>Username</th>
         <th>password</th>
         <th>Administrator</th>
-        <th> Remove User </th>
+        <th>Remove User</th>
     </tr>
     {% for user in users %} <!-- What is going on here? Fix -->
     <tr>
         <td>{{ user.UserId }}</td>
         <td>{{ user.UserName }}</td>
-        <td>{{ user.Password }}</td>
+        <td>{{ user.Password }}</td> <!-- To be removed: System for only users to see their password? -->
         <td>{{ user.Is_Admin }}</td>
         <td>
             <adminDelete>

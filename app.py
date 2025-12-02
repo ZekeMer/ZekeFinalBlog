@@ -23,17 +23,25 @@ class Blog(db.Model): # user.blog --> blogs  user.Author --> author
     BookAuthor = db.Column(db.String(40), nullable = False)
     BlogTitle = db.Column(db.String(60), nullable = False)
     BlogAuthor = db.Column(db.String(40), nullable = False)
-    InitalComment = db.Column(db.String(250), nullable = False)
+    InitialComment = db.Column(db.String(250), nullable = False)
     PostTime = db.Column(db.DateTime, default = datetime.now(timezone.utc))
-    Comment = db.Column(db.String(250), nullable = False)
     UserId = db.Column(db.Integer, db.ForeignKey('user.UserId'), nullable = False) # One-to-Many relationship where one user can have many blogs
+    comments = db.relationship('Comment', backref = 'blog', lazy = True)
+
+class Comment(db.Model):
+    CommentId = db.Column(db.Integer, primary_key = True)
+    CommentText = db.Column(db.String(500), nullable = False)
+    PostTime = db.Column(db.DateTime, default = datetime.now(timezone.utc))
+    UserId = db.Column(db.Integer, db.ForeignKey('user.UserId'), nullable = False)
+    BlogId = db.Column(db.Integer, db.ForeignKey('blog.BlogId'), nullable = False)
 
 class User(db.Model, UserMixin):
     UserId = db.Column(db.Integer, primary_key = True)
     UserName = db.Column(db.String(20), nullable = False, unique = True)
     Password = db.Column(db.String(200), nullable = False)
-    Is_Admin = db.Column(db.Boolean, nullable=False) # Is this user an admin? Try to get this to work via normal sign up and jsut check permissions before sensitive actions.
-    blogs = db.relationship('Blog', backref = "Author", lazy = True) # backref Auhtor refers to Blog author 
+    Is_Admin = db.Column(db.Boolean, nullable=False) 
+    blogs = db.relationship('Blog', backref = "author", lazy = True) # backref Author refers to Blog author 
+    comments = db.relationship('Comment', backref = 'author', lazy = True)
 
     def get_id(self):
         return str(self.UserId)
@@ -78,10 +86,10 @@ def mainpage():
 
 @app.route('/home') 
 def home():
-    # blog = Blog.query.all()
-    return render_template("home.html")
+    blogs = Blog.query.all()
+    return render_template("home.html", blogs = blogs)
 
-@app.route('/admin') # HTML page for route to be added.
+@app.route('/admin')
 @fresh_login_required #Sees if logged in and if session is fresh
 def admin():
     blogs = Blog.query.all()
@@ -94,7 +102,7 @@ def admin_deleteUser(userId):
     userDelete = User.query.get_or_404(userId)
 
     if (userDelete.Is_Admin):
-        flash("You cannot delete admin accounts here. Direct Delete through command.")
+        flash("You cannot delete admin accounts here.")
         return redirect(url_for('admin'))
 
     db.session.delete(userDelete)
@@ -126,7 +134,7 @@ def signup():
                 flash("This username is taken, try another.")
             else:
                 try:
-                    new_user = User(UserName = username, Password = password, Is_Admin = False) # This should be set to false forever.
+                    new_user = User(UserName = username, Password = password, Is_Admin = False)
                     db.session.add(new_user)
                     db.session.commit()
                     flash("Sign up successful. Log in.")
@@ -173,7 +181,7 @@ def home_createBlog():
         blogTitle = request.form.get("BlogTitle").strip()
         initalComment = request.form.get("InitialComment").strip()
         bookTitle = request.form.get("Book").strip()
-        bookAuthor = request.form.get("BookAuthor", "").strip()
+        bookAuthor = request.form.get("BookAuthor", "").strip() # Only input not required of the user
 
         if not blogTitle or not initalComment or not bookTitle:
             postError = "You must fill in all required fields!"
@@ -181,16 +189,17 @@ def home_createBlog():
         
         try:
             new_blog = Blog(BlogTitle = blogTitle, 
-                        BlogAuthor = current_user.UserName, 
-                        InitialComment = initalComment, 
-                        Book = bookTitle,
-                        BookAuthor = bookAuthor, 
-                        UserId = current_user.UserId)
+                BlogAuthor = current_user.UserName, 
+                InitialComment = initalComment, 
+                Book = bookTitle,
+                BookAuthor = bookAuthor, 
+                UserId = current_user.UserId)
             db.session.add(new_blog)
             db.session.commit()
             flash("Tome added to blog collection successfully!")
         except Exception as e:
             db.session.rollback()
+            print(f"Error: {e}")
             newBlogError = "There was an error creating your new blog. Try again." 
             return render_template("createBlog.html", newBlogError = newBlogError)
         
@@ -199,7 +208,7 @@ def home_createBlog():
     return render_template("createBlog.html")
 
 
-@app.route('/home/postBlog', methods = ['GET', 'POST']) # Post blog
+@app.route('/home/postBlog', methods = ['GET', 'POST']) # Post blog --> TO BE DONE 
 def home_postBlog():
     pass
     

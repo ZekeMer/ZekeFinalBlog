@@ -12,14 +12,14 @@
     overflow: hidden
 }
 
-.topnav a {
+.topnav a { /* This refers to the a elements found inside .topnav */
     float: left;
     color: white;
     text-align: center;
     padding: 10px;
     text-decoration: none ;
     font-size: 15px;
-} /* This refers to the a elements found inside .topnav */
+} 
 
 .topnav a:hover {
     background-color: white ;
