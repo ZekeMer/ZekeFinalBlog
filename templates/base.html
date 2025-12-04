@@ -17,6 +17,7 @@
         
         
         <a href = "{{ url_for('home_profile') }}" class = "split"> Profile </a>
+
         <!-- Everyone who is signed in gets these -->
         {% if current_user.is_authenticated %}
 
@@ -32,6 +33,7 @@
 
         {% else %}
 
+            <!-- If NOT authenticated-->
             <a href = "{{ url_for('login') }}" class = "split"> Log in </a>
             <a href = "{{ url_for('signup') }}"class = "split"> Sign up </a>
 

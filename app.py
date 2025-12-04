@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import os
+from werkzeug.security import generate_password_hash, check_password_hash #Use these later
 
 load_dotenv() #Reads from .env 
 secret_key = os.getenv("SECRET_KEY")
@@ -64,14 +65,14 @@ def load_user(UserId): #Passing arbitrary argument
 
 @app.cli.command()
 def create_admin():
-    # from werkzeug.security import generate_password_hash
-    # import getpass
+    import getpass
 
     #Make an admin from the CLI (command line)
     user_name = input("Enter admin username: ") 
-    pass_word = input("Enter admin password: ")
-    
-    admin = User(UserName=user_name.strip(), Password=pass_word.strip(), Is_Admin=True) #Figure out the tables in here.
+    pass_word = getpass.getpass("Enter admin password: ")
+
+    # hash_pass = generate_password_hash(pass_word.strip(), method ='', salt_length = ) #What method and salt_length do I use??    
+    admin = User(UserName=user_name.strip(), Password=generate_password_hash(pass_word.strip()), Is_Admin=True) #Figure out the tables in here.
 
     db.session.add(admin)
     db.session.commit()
@@ -133,7 +134,7 @@ def signup():
                 flash("This username is taken, try another.")
             else:
                 try:
-                    new_user = User(UserName = username, Password = password, Is_Admin = False)
+                    new_user = User(UserName = username, Password = generate_password_hash(password), Is_Admin = False)
                     db.session.add(new_user)
                     db.session.commit()
                     flash("Sign up successful. Log in.")
@@ -154,7 +155,7 @@ def login():
 
         userFound = User.query.filter(User.UserName == username).first() # Store the entered username as userFound here
         if userFound:
-            if userFound.Password == password: # use stored variable of username and then get the password.
+            if check_password_hash(userFound.Password, password): # hash the input and compare to hash stored on db.
                 login_user(userFound, remember = False, fresh = True)
                 return redirect(url_for('home'))
             else:
@@ -260,7 +261,7 @@ def home_selectBlogs_comment(blogId):
         commentError = "There was an error posting your comment. Try again."
         return render_template('selectBlogs.html', commentError = commentError, blogId = blogId)
         
-    return render_template('selectBlogs.html', getBlog = getBlog)
+    return render_template('selectBlogs.html', getBlog = getBlog) # How to prevent recommenting on page reload.
 
 @app.route('/home/blogs/<int:blogId>/comment/<int:commentId>/delete', methods = ['POST']) #Holding 2 IDs now, specify names.
 @fresh_login_required
