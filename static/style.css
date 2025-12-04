@@ -1,3 +1,7 @@
+body {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
 /* Denote special text */
 .error { color: red; }
 
@@ -40,6 +44,15 @@
     background-color: white;
     color: black;
 }
+
+/* Footer */
+/* footer {
+    text-align: center;
+    padding: 3px;
+    background-color: darkolivegreen;
+    color: white;
+    
+} */
 
 /* Base text styling */
 h1 {color: darkgreen;}

@@ -32,13 +32,13 @@
 
         {% else %}
 
-        <a href = "{{ url_for('login') }}" class = "split"> Log in </a>
-        <a href = "{{ url_for('signup') }}"class = "split"> Sign up </a>
+            <a href = "{{ url_for('login') }}" class = "split"> Log in </a>
+            <a href = "{{ url_for('signup') }}"class = "split"> Sign up </a>
 
         {% endif %}
         
     </header>
-    
+
     <hr>
 
     {# Flash messages across all base.html extensions #}
@@ -53,6 +53,10 @@
     {% endwith %}
 
     {% block content %} {% endblock %}
+
+    {# <footer>
+        <p> Ezekiel M. Her <br> Copyright 2025 | Powered by Flask </p>
+    </footer> #}
 
 </body>
 </html>

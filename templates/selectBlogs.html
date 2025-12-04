@@ -18,8 +18,8 @@
 
     <deleteBlog>
         {% if current_user.is_authenticated and (current_user.UserId == getBlog.UserId or current_user.Is_Admin) %}
-                
-            <form method="POST" action="{{ url_for('home_selectBlogs_delete', id=getBlog.BlogId) }}" onsubmit="return confirm('Do you really want to delete this blog?');">
+            {# JS function at the end #}
+            <form method="POST" action="{{ url_for('home_selectBlogs_delete', blogId=getBlog.BlogId) }}" onsubmit="return confirm('Do you really want to delete this blog?');">
                     
                 <button type="submit">Delete Blog</button>
 
@@ -32,7 +32,7 @@
 
     <commentSection>
 
-        <form action = "{{ url_for('home_selectBlogs_comment', id = getBlog.BlogId) }}" method = "POST"> {# Find a way to hide this?  #}
+        <form action = "{{ url_for('home_selectBlogs_comment', blogId = getBlog.BlogId) }}" method = "POST"> {# Find a way to hide this?  #}
         
             <comment>
                 <label for = "CommentText"> Comment: </label>
@@ -73,7 +73,7 @@
 
                             {% if current_user.is_authenticated and (current_user.UserId == comment.UserId or current_user.Is_Admin) %}
                                 
-                                <form method="POST" action="{{ url_for('home_selectBlogs_comment_delete', blogId=getBlog.BlogId, commentId = comment.CommentId) }}" onsubmit="return confirm('Do you really want to delete this comment?');" style = "display: inline;">
+                                <form method="POST" action="{{ url_for('home_selectBlogs_comment_delete', blogId = getBlog.BlogId, commentId = comment.CommentId) }}" onsubmit="return confirm('Do you really want to delete this comment?');">
                                     
                                     <button type="submit">Delete Comment</button>
 

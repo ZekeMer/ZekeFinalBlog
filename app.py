@@ -35,13 +35,13 @@ class Comment(db.Model):
     UserId = db.Column(db.Integer, db.ForeignKey('user.UserId'), nullable = False)
     BlogId = db.Column(db.Integer, db.ForeignKey('blog.BlogId'), nullable = False)
 
-class User(db.Model, UserMixin): # If a user is deleted; how is this handled? Many fields cannot be null. --> Go for Soft Delete?
+class User(db.Model, UserMixin): 
     UserId = db.Column(db.Integer, primary_key = True)
     UserName = db.Column(db.String(20), nullable = False, unique = True)
     Password = db.Column(db.String(200), nullable = False)
     Is_Admin = db.Column(db.Boolean, nullable=False) 
-    blogs = db.relationship('Blog', backref = "author", lazy = True) # backref Author refers to Blog author 
-    comments = db.relationship('Comment', backref = 'author', lazy = True)
+    blogs = db.relationship('Blog', backref = "author", lazy = True, cascade = 'all, delete-orphan') # backref Author refers to Blog author 
+    comments = db.relationship('Comment', backref = 'author', lazy = True, cascade = 'all, delete-orphan')
 
     def get_id(self):
         return str(self.UserId)
@@ -95,20 +95,20 @@ def admin():
     users = User.query.all()
     return render_template("admin.html", blogs = blogs, users = users) # When making a list of the users, DON'T store in same name to avoid confusing Jinja
 
-@app.route('/admin/deleteUser/<int:id>', methods = ['POST'])
-@fresh_login_required
-def admin_deleteUser(id):
-    userDelete = User.query.get_or_404(id)
+# @app.route('/admin/deleteUser/<int:id>', methods = ['POST'])
+# @fresh_login_required
+# def admin_deleteUser(id):
+#     userDelete = User.query.get_or_404(id)
 
-    if (userDelete.Is_Admin):
-        flash("You cannot delete admin accounts here.")
-        return redirect(url_for('admin'))
+#     if (userDelete.Is_Admin):
+#         flash("You cannot delete admin accounts here.")
+#         return redirect(url_for('admin'))
 
-    db.session.delete(userDelete)
-    db.session.commit()
-    flash(f"Successfully deleted user \"{userDelete.UserName}\"")
+#     db.session.delete(userDelete)
+#     db.session.commit()
+#     flash(f"Successfully deleted user \"{userDelete.UserName}\"")
 
-    return redirect(url_for('admin'))
+#     return redirect(url_for('admin'))
 
 @app.route('/signup', methods = ['GET', 'POST'])
 def signup():
@@ -213,20 +213,20 @@ def home_blogs():
     blogs = Blog.query.all()
     return render_template('blogs.html', blogs = blogs)
 
-@app.route('/home/blogs/<int:id>', methods = ['POST', 'GET']) # Use this to view each individual blog 
+@app.route('/home/blogs/<int:id>', methods = ['POST', 'GET']) # Use this to view each individual blog / Why is blogId not valid???
 # @fresh_login_required
 def home_selectBlogs(id):
     getBlog = Blog.query.get_or_404(id)
     return render_template('selectBlogs.html', getBlog = getBlog)
 
-@app.route('/home/blogs/<int:id>/delete', methods = ['POST'])
+@app.route('/home/blogs/<int:blogId>/delete', methods = ['POST'])
 @fresh_login_required
-def home_selectBlogs_delete(id):
-    blog_to_delete = Blog.query.get_or_404(id)
+def home_selectBlogs_delete(blogId):
+    blog_to_delete = Blog.query.get_or_404(blogId)
 
     if blog_to_delete.UserId != current_user.UserId and not current_user.Is_Admin:
         flash("You cannot delete this blog!")
-        return redirect(url_for('home_selectBlogs', id=id))
+        return redirect(url_for('home_selectBlogs', blogId = blogId))
 
     db.session.delete(blog_to_delete)
     db.session.commit()
@@ -234,16 +234,16 @@ def home_selectBlogs_delete(id):
 
     return redirect(url_for('home_blogs'))
 
-@app.route('/home/blogs/<int:id>/comment', methods = ['POST'])
+@app.route('/home/blogs/<int:blogId>/comment', methods = ['POST'])
 @fresh_login_required
-def home_selectBlogs_comment(id):
-    getBlog = Blog.query.get_or_404(id)
+def home_selectBlogs_comment(blogId):
+    getBlog = Blog.query.get_or_404(blogId)
 
     commentText = request.form.get("CommentText").strip()
 
     if not commentText:
         inputError = "You cannot comment nothing."
-        return render_template('selectBlogs.html', inputerror = inputError, id = id)
+        return render_template('selectBlogs.html', inputerror = inputError, blogId = blogId)
         
     try: 
         new_comment = Comment(
@@ -258,7 +258,7 @@ def home_selectBlogs_comment(id):
         db.session.rollback()
         print(f'Error: {e}')
         commentError = "There was an error posting your comment. Try again."
-        return render_template('selectBlogs.html', commentError = commentError, id =id)
+        return render_template('selectBlogs.html', commentError = commentError, blogId = blogId)
         
     return render_template('selectBlogs.html', getBlog = getBlog)
 
@@ -269,7 +269,7 @@ def home_selectBlogs_comment_delete(blogId, commentId):
 
     if comment_to_delete.UserId != current_user.UserId and not current_user.Is_Admin:
         flash("You cannot delete this comment!")
-        return redirect(url_for('home_selectBlogs', id=blogId))
+        return redirect(url_for('home_selectBlogs', id = blogId))
     
     username = comment_to_delete.author.UserName
 
@@ -283,3 +283,21 @@ def home_selectBlogs_comment_delete(blogId, commentId):
 @fresh_login_required 
 def home_profile():
     return render_template("profile.html")
+
+@app.route('/home/profile/delete/<int:userId>', methods = ['POST'])
+@fresh_login_required
+def home_profile_delete(userId):
+    user_self_delete = User.query.get_or_404(userId)
+
+    if current_user.Is_Admin: # Ensure admins cannot delete despite not being able to see button.
+        flash("You cannot self delete an administrator account! Contact the owner.")
+        return redirect(url_for('home_profile'))
+    
+    username = current_user.UserName # could also be: user_self_delete.UserName
+
+    db.session.delete(user_self_delete)
+    db.session.commit()
+    flash(f"Deleted your account with username: {username}")
+
+    return redirect(url_for('home')) # Does this produce an error since the user no longer exists?
+    

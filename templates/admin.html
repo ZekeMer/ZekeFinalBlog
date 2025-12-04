@@ -12,7 +12,7 @@
         <th>Username</th>
         <th>password</th>
         <th>Administrator</th>
-        <th>Remove User</th>
+        {# <th>Remove User</th> #}
     </tr>
     {% for user in users %} <!-- What is going on here? Fix -->
     <tr>
@@ -20,14 +20,14 @@
         <td>{{ user.UserName }}</td>
         <td>{{ user.Password }}</td> <!-- To be removed: System for only users to see their password? -->
         <td>{{ user.Is_Admin }}</td>
-        <td>
+        {# <td>
             <adminDelete>
                 <form method = "POST" action = "{{ url_for('admin_deleteUser', id = user.UserId) }}">
-                    <input name = "UserId" type = "hidden" value = "{{ user.UserId }}"> {# What does this line do? #}
+                    <input name = "UserId" type = "hidden" value = "{{ user.UserId }}"> <!-- What does this line do? -->
                     <button type = "submit"> Delete User </button>
                 </form>           
             </adminDelete>
-        </td>
+        </td> #}
     </tr>
     {% endfor %}
 </table>

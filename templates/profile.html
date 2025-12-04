@@ -5,16 +5,26 @@
 
 {% if current_user.Is_Admin %}
 
-<p> Username: <span class = "admin"> {{ current_user.UserName }} </span> </p>
+    <p> Username: <span class = "admin"> {{ current_user.UserName }} </span> </p>
 
 {% else %}
 
-<p>  Username: {{ current_user.UserName }}</p>
+    <p>  Username: {{ current_user.UserName }}</p>
 
 {% endif %}
 
 <!-- Find a way to hide and prevent shoulder surfing -->
 <p> Password: {{current_user.Password}} </p> 
 
+    {% if current_user.is_authenticated and not current_user.Is_Admin %}
+
+    <adminDelete>
+        <form method = "POST" action = "{{ url_for('home_profile_delete', userId = current_user.UserId) }}" onsubmit="return confirm('Do you really want to delete your account? This will delete all your blogs and comments!');">
+            <input name = "UserId" type = "hidden" value = "{{ current_user.UserId }}">
+            <button type = "submit"> Delete My Profile </button>
+        </form>           
+    </adminDelete>
+
+    {% endif %}
 
 {% endblock %}
