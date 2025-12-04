@@ -26,7 +26,7 @@ class Blog(db.Model): # user.blog --> blogs  user.Author --> author
     InitialComment = db.Column(db.String(250), nullable = False)
     PostTime = db.Column(db.DateTime, default = datetime.now(timezone.utc))
     UserId = db.Column(db.Integer, db.ForeignKey('user.UserId'), nullable = False) # One-to-Many relationship where one user can have many blogs
-    comments = db.relationship('Comment', backref = 'blog', lazy = True)
+    comments = db.relationship('Comment', backref = 'blog', lazy = True, cascade = 'all, delete-orphan')
 
 class Comment(db.Model):
     CommentId = db.Column(db.Integer, primary_key = True)
@@ -55,7 +55,7 @@ login_manager.init_app(app) # Configure for login
 login_manager.login_view = "login" # return to login if authentication fails
 login_manager.refresh_view = "login" # This does the same as code above, but when session expires. Redundant.
 login_manager.needs_refresh_message = "Your session has expired. Log in again. Or don't I guess."
-login_manager.login_message = "To see page, please log in or create an account." # Redirect to login_view define above
+login_manager.login_message = "Please log in or create an account." # Redirect to login_view define above
 
 @login_manager.user_loader #Find correct user
 def load_user(UserId): #Passing arbitrary argument
@@ -218,9 +218,68 @@ def home_blogs():
 def home_selectBlogs(id):
     getBlog = Blog.query.get_or_404(id)
     return render_template('selectBlogs.html', getBlog = getBlog)
+
+@app.route('/home/blogs/<int:id>/delete', methods = ['POST'])
+@fresh_login_required
+def home_selectBlogs_delete(id):
+    blog_to_delete = Blog.query.get_or_404(id)
+
+    if blog_to_delete.UserId != current_user.UserId and not current_user.Is_Admin:
+        flash("You cannot delete this blog!")
+        return redirect(url_for('home_selectBlogs', id=id))
+
+    db.session.delete(blog_to_delete)
+    db.session.commit()
+    flash(f"Blog: \"{blog_to_delete.BlogTitle}\" deleted.")
+
+    return redirect(url_for('home_blogs'))
+
+@app.route('/home/blogs/<int:id>/comment', methods = ['POST'])
+@fresh_login_required
+def home_selectBlogs_comment(id):
+    getBlog = Blog.query.get_or_404(id)
+
+    commentText = request.form.get("CommentText").strip()
+
+    if not commentText:
+        inputError = "You cannot comment nothing."
+        return render_template('selectBlogs.html', inputerror = inputError, id = id)
+        
+    try: 
+        new_comment = Comment(
+        CommentText = commentText, 
+            UserId = current_user.UserId,
+            BlogId = getBlog.BlogId 
+            )
+        db.session.add(new_comment)
+        db.session.commit()
+        flash("Commented successfully!")
+    except Exception as e:
+        db.session.rollback()
+        print(f'Error: {e}')
+        commentError = "There was an error posting your comment. Try again."
+        return render_template('selectBlogs.html', commentError = commentError, id =id)
+        
+    return render_template('selectBlogs.html', getBlog = getBlog)
+
+@app.route('/home/blogs/<int:blogId>/comment/<int:commentId>/delete', methods = ['POST']) #Holding 2 IDs now, specify names.
+@fresh_login_required
+def home_selectBlogs_comment_delete(blogId, commentId):
+    comment_to_delete = Comment.query.get_or_404(commentId)
+
+    if comment_to_delete.UserId != current_user.UserId and not current_user.Is_Admin:
+        flash("You cannot delete this comment!")
+        return redirect(url_for('home_selectBlogs', id=blogId))
     
-@app.route('/home/profile') # Try to only show some routes, including this one, to logged on users
-#If the user isn't logged in, then redirect ot login page specified earlier
-@fresh_login_required # Figure this out eventually - Redundant right now as it already checks the log in
+    username = comment_to_delete.author.UserName
+
+    db.session.delete(comment_to_delete)
+    db.session.commit()
+    flash(f"Comment by {username} deleted.")
+
+    return redirect(url_for('home_selectBlogs', id = blogId))
+
+@app.route('/home/profile') 
+@fresh_login_required 
 def home_profile():
     return render_template("profile.html")

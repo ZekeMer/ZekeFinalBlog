@@ -6,6 +6,11 @@
     font-weight: bolder;
 }
 
+.vip {
+    color: #50c878;
+    font-weight: bolder;
+}
+
 /* navigation bar */
 .topnav {
     background-color: darkolivegreen;

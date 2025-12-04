@@ -6,3 +6,5 @@
 //     visible.type = "password";
 //   }
 // }
+
+// function confirmDelete () {}
