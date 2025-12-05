@@ -37,15 +37,37 @@
             <p>New to Tome Blog? </p> <a href = "{{ url_for('signup') }}"> Sign up </a> {# Figure out how to get on the same line later #}
     </div>
 
-    {% with messages = get_flashed_messages() %}
+     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div style="background: rgba(199, 97, 1, 0.938); padding: 15px;">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
+            {% for message in messages %}
+                <div class="alert" style="position: relative; background: rgba(199, 97, 1, 0.938); padding: 15px; margin-bottom: 10px; color: black;">
+                    {{ message }}
+                    <button type="button" 
+                            onclick="this.parentElement.remove()" 
+                            style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: black;">
+                        &times;
+                    </button>
+                </div>
+            {% endfor %}
         {% endif %}
     {% endwith %}
+
+<script> //Close the message after 5 seconds.
+
+setTimeout(function() {
+
+    const alerts = document.querySelectorAll('.alert');
+
+    alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+
+    });
+
+}, 5000);
+
+</script>
 
 </body>
 </html>

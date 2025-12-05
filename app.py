@@ -302,7 +302,7 @@ def home_profile_delete(userId):
         flash("You cannot self delete an administrator account! Contact the owner.")
         return redirect(url_for('home_profile'))
     
-    username = current_user.UserName # could also be: user_self_delete.UserName
+    username = current_user.UserName 
 
     db.session.delete(user_self_delete)
     db.session.commit()
