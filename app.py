@@ -4,7 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 import os
-from werkzeug.security import generate_password_hash, check_password_hash #Use these later
+from werkzeug.security import generate_password_hash, check_password_hash 
+import bleach
 
 load_dotenv() #Reads from .env 
 secret_key = os.getenv("SECRET_KEY")
@@ -63,16 +64,22 @@ def load_user(UserId): #Passing arbitrary argument
     #Database lookup logic to query for UserId
     return User.query.get(int(UserId)) # Could be user.UserId or only 'UserId' inside parameter.
 
+def sanitize_comment(text):
+    allowed_tags = ['p', 'br', 'strong', 'em',
+                    'ul', 'ol', 'li', 'b', 'i', 'h1']
+    
+    bleached_text = bleach.clean(text, tags=allowed_tags, strip=True)
+    return bleached_text
+
 @app.cli.command()
 def create_admin():
     import getpass
 
     #Make an admin from the CLI (command line)
     user_name = input("Enter admin username: ") 
-    pass_word = getpass.getpass("Enter admin password: ")
-
-    # hash_pass = generate_password_hash(pass_word.strip(), method ='', salt_length = ) #What method and salt_length do I use??    
-    admin = User(UserName=user_name.strip(), Password=generate_password_hash(pass_word.strip()), Is_Admin=True) #Figure out the tables in here.
+    pass_word = getpass.getpass("Enter admin password: ") # Hide input in terminal
+  
+    admin = User(UserName=user_name.strip(), Password=generate_password_hash(pass_word.strip()), Is_Admin=True) 
 
     db.session.add(admin)
     db.session.commit()
@@ -215,7 +222,6 @@ def home_blogs():
     return render_template('blogs.html', blogs = blogs)
 
 @app.route('/home/blogs/<int:id>', methods = ['POST', 'GET']) # Use this to view each individual blog / Why is blogId not valid???
-# @fresh_login_required
 def home_selectBlogs(id):
     getBlog = Blog.query.get_or_404(id)
     return render_template('selectBlogs.html', getBlog = getBlog)
@@ -245,10 +251,12 @@ def home_selectBlogs_comment(blogId):
     if not commentText:
         inputError = "You cannot comment nothing."
         return render_template('selectBlogs.html', inputerror = inputError, blogId = blogId)
+    
+    squeaky_clean = sanitize_comment(commentText)
         
     try: 
         new_comment = Comment(
-        CommentText = commentText, 
+        CommentText = squeaky_clean, 
             UserId = current_user.UserId,
             BlogId = getBlog.BlogId 
             )
