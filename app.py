@@ -19,7 +19,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours = 1)
 
 db = SQLAlchemy(app)
 
-class Blog(db.Model): # user.blog --> blogs  user.Author --> author
+# Users can have many Comments and Blogs.
+
+class Blog(db.Model): # user.blog --> blogs ;  user.Author --> author
     BlogId = db.Column(db.Integer, primary_key = True)
     Book = db.Column(db.String(60), nullable = False)
     BookAuthor = db.Column(db.String(40), nullable = False)
@@ -55,14 +57,13 @@ with app.app_context():
 login_manager = LoginManager() #part of flask_login; allows logins to work with code
 login_manager.init_app(app) # Configure for login
 login_manager.login_view = "login" # return to login if authentication fails
-login_manager.refresh_view = "login" # This does the same as code above, but when session expires. Redundant.
+login_manager.refresh_view = "login" # This does the same as code above, but when session expires. Slightly Redundant.
 login_manager.needs_refresh_message = "Your session has expired. Log in again. Or don't I guess."
 login_manager.login_message = "Please log in or create an account." # Redirect to login_view define above
 
-@login_manager.user_loader #Find correct user
-def load_user(UserId): #Passing arbitrary argument
-    #Database lookup logic to query for UserId
-    return User.query.get(int(UserId)) # Could be user.UserId or only 'UserId' inside parameter.
+@login_manager.user_loader 
+def load_user(UserId): 
+    return User.query.get(int(UserId)) 
 
 def sanitize_comment(text):
     allowed_tags = ['p', 'br', 'strong', 'em',
@@ -207,12 +208,10 @@ def home_createBlog():
             flash("Tome added to blog collection successfully!")
         except Exception as e:
             db.session.rollback()
-            print(f"Error: {e}")
             newBlogError = "There was an error creating your new blog. Try again." 
             return render_template("createBlog.html", newBlogError = newBlogError)
         
-        # return render_template('postBlog.html', new_blog = new_blog)
-        return redirect(url_for('home_blogs'))
+        return render_template('postBlog.html', new_blog = new_blog)
     
     return render_template("createBlog.html")
 
@@ -221,9 +220,11 @@ def home_blogs():
     blogs = Blog.query.all()
     return render_template('blogs.html', blogs = blogs)
 
-@app.route('/home/blogs/<int:id>', methods = ['POST', 'GET']) # Use this to view each individual blog / Why is blogId not valid???
+@app.route('/home/blogs/<int:id>', methods = ['POST', 'GET']) # Use this to view each individual blog
 def home_selectBlogs(id):
     getBlog = Blog.query.get_or_404(id)
+    getBlog.comments = sorted(getBlog.comments, key=lambda c: c.PostTime, reverse=True) 
+
     return render_template('selectBlogs.html', getBlog = getBlog)
 
 @app.route('/home/blogs/<int:blogId>/delete', methods = ['POST'])
@@ -265,11 +266,10 @@ def home_selectBlogs_comment(blogId):
         flash("Commented successfully!")
     except Exception as e:
         db.session.rollback()
-        print(f'Error: {e}')
         commentError = "There was an error posting your comment. Try again."
         return render_template('selectBlogs.html', commentError = commentError, blogId = blogId)
-        
-    return render_template('selectBlogs.html', getBlog = getBlog) # How to prevent recommenting on page reload.
+    
+    return render_template('selectBlogs.html', getBlog = getBlog) 
 
 @app.route('/home/blogs/<int:blogId>/comment/<int:commentId>/delete', methods = ['POST']) #Holding 2 IDs now, specify names.
 @fresh_login_required
@@ -308,5 +308,5 @@ def home_profile_delete(userId):
     db.session.commit()
     flash(f"Deleted your account with username: {username}")
 
-    return redirect(url_for('home')) # Does this produce an error since the user no longer exists?
+    return redirect(url_for('home')) 
     

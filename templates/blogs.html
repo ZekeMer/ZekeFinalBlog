@@ -10,18 +10,18 @@
     <hr>
 
     <h1>
-        <form method = "POST" action = " {{ url_for('home_selectBlogs', id = blog.BlogId) }}"></form> {# Line may not be needed #}
-            <input name = "BlogId" type = "hidden" value = "{{ blog.BlogId }}"> {# Line may not be needed #}
+        <form method = "POST" action = " {{ url_for('home_selectBlogs', id = blog.BlogId) }}"></form> 
+            <input name = "BlogId" type = "hidden" value = "{{ blog.BlogId }}"> 
             <a href = "{{ url_for('home_selectBlogs', id = blog.BlogId) }}"> {{ blog.BlogTitle }} </a>       
         </form>
 
     </h1>
 
-    <p> Tome Topic by: <strong> {{ blog.BlogAuthor }} </strong> </p> <!-- Admin users should have differing coloring -->
+    <p> Tome Topic by: <strong> {{ blog.BlogAuthor }} </strong> </p> {# Admins have different coloring #}
     <p> Book: {{ blog.Book }} </p>
     <p> Book Author: {{ blog.BookAuthor if blog.BookAuthor else "No Author provided."}} </p>
-    <p> {{ blog.InitialComment }} </p> <!-- To hold its place, view on link click -->
-    <p> Posted at: {{ blog.PostTime }}  </p> <!-- Find a way to get rid of floats for time-->
+    <p> {{ blog.InitialComment }} </p> 
+    <p> Posted at: {{ blog.PostTime.strftime('%B %d, %Y at %I:%M %p')  }}  </p> 
 
 </section>
 

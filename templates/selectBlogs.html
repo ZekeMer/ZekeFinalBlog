@@ -7,8 +7,8 @@
     <p> Tome Topic by: <strong> {{ getBlog.BlogAuthor }} </strong> </p> <!-- Admin users should have differing coloring -->
     <p> Book: {{ getBlog.Book }} </p>
     <p> Book Author: {{ getBlog.BookAuthor if getBlog.BookAuthor else "No Author Provided."}}</p>
-    <p> {{ getBlog.InitialComment }} </p> <!-- To hold its place, view on link click -->
-    <p> Posted at: {{ getBlog.PostTime }}  </p> <!-- Find a way to get rid of floats for time-->
+    <p> {{ getBlog.InitialComment }} </p> 
+    <p> Posted at: {{ getBlog.PostTime.strftime('%B %d, %Y at %I:%M %p') }} </p> 
 
     {% if inputError %}
         <p class = "error"> {{ inputError }} </p>
@@ -18,6 +18,7 @@
 
     <deleteBlog>
         {% if current_user.is_authenticated and (current_user.UserId == getBlog.UserId or current_user.Is_Admin) %}
+
             {# JS function at the end #}
             <form method="POST" action="{{ url_for('home_selectBlogs_delete', blogId=getBlog.BlogId) }}" onsubmit="return confirm('Do you really want to delete this blog?');">
                     
@@ -32,7 +33,7 @@
 
     <commentSection>
 
-        <form action = "{{ url_for('home_selectBlogs_comment', blogId = getBlog.BlogId) }}" method = "POST"> {# Find a way to hide this?  #}
+        <form action = "{{ url_for('home_selectBlogs_comment', blogId = getBlog.BlogId) }}" method = "POST"> 
         
             <comment>
                 <label for = "CommentText"> Comment: </label>
@@ -45,50 +46,51 @@
 
         </form>
 
+            <hr style = "border: 3px solid black;">
+
+        {% for comment in getBlog.comments %} 
+
+            {% if comment.author.Is_Admin and comment.blog.BlogAuthor == comment.author.UserName %}
+
+                <p> <strong> {{ comment.author.UserName }} </strong> - <span class = "admin"> Admin / Original Poster - {{ comment.PostTime.strftime('%B %d, %Y at %I:%M %p') }} </span> </p> 
+
+            {% elif comment.blog.BlogAuthor == comment.author.UserName %}
+
+                <p> <strong> {{ comment.author.UserName }} </strong> - <span class = "vip"> Original Poster - {{ comment.PostTime.strftime('%B %d, %Y at %I:%M %p') }} </span>  </p>
+
+            {% elif comment.author.Is_Admin %}
+
+                <p> <strong> {{ comment.author.UserName }} </strong> - <span class = "admin"> Admin - {{ comment.PostTime.strftime('%B %d, %Y at %I:%M %p') }} </span> </p>
+
+            {% else %}
+                    
+                <p> <strong> {{  comment.author.UserName }} - <span class = "admin"> {{ comment.PostTime.strftime('%B %d, %Y at %I:%M %p') }} </span> </strong> </p>
+
+            {% endif %}
+
+                <p> {{ comment.CommentText }}  </p> 
+
+                    <deleteComment>
+
+                        {% if current_user.is_authenticated and (current_user.UserId == comment.UserId or current_user.Is_Admin) %}
+                                
+                            <form method="POST" action="{{ url_for('home_selectBlogs_comment_delete', blogId = getBlog.BlogId, commentId = comment.CommentId) }}" onsubmit="return confirm('Do you really want to delete this comment?');">
+                                    
+                                <button type="submit">Delete Comment</button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </deleteComment>
+
             <hr>
 
-            {% for comment in getBlog.comments %} 
+            {% else %}
 
-                {% if comment.author.Is_Admin and comment.blog.BlogAuthor == comment.author.UserName %}
+                <p> There are no comments currently. </p>
 
-                    <p> <strong> {{ comment.author.UserName }} </strong> - <span class = "admin"> Admin / Original Poster </span> </p> 
-
-                {% elif comment.blog.BlogAuthor == comment.author.UserName %}
-
-                        <p> <strong> {{ comment.author.UserName }} </strong> - <span class = "vip"> Original Poster </span>  </p>
-
-                {% elif comment.author.Is_Admin %}
-
-                    <p> <strong> {{ comment.author.UserName }} </strong> - <span class = "admin"> Admin </span> </p>
-
-                {% else %}
-                    
-                    <p> <strong> {{  comment.author.UserName }} </strong> </p>
-
-                {% endif %}
-
-                    <p> {{ comment.CommentText }}  </p> 
-
-                        <deleteComment>
-
-                            {% if current_user.is_authenticated and (current_user.UserId == comment.UserId or current_user.Is_Admin) %}
-                                
-                                <form method="POST" action="{{ url_for('home_selectBlogs_comment_delete', blogId = getBlog.BlogId, commentId = comment.CommentId) }}" onsubmit="return confirm('Do you really want to delete this comment?');">
-                                    
-                                    <button type="submit">Delete Comment</button>
-
-                                </form>
-
-                            {% endif %}
-
-                        </deleteComment>
-                <hr>
-
-                {% else %}
-
-                    <p> There are no comments currently. </p>
-
-            {% endfor %}
+        {% endfor %}
 
     </commentSection>
 

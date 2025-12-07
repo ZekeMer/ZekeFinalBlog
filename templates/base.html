@@ -25,7 +25,7 @@
             <!-- Only Admin users can access these -->
             {% if current_user.Is_Admin %}
                  
-                <a href = "{{  url_for('home_createBlog') }}"> Start New Topic </a> {# May need to move this into the ADMIN ONLY section #}
+                <a href = "{{  url_for('home_createBlog') }}"> Start New Topic </a>
                 <a href = " {{ url_for('admin') }}"> Admin View </a>
 
             {% endif %} 
@@ -41,20 +41,6 @@
     </header>
 
     <hr>
-
-    {# Flash messages across all base.html extensions #}
-    {# {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div style="background: rgba(199, 97, 1, 0.938); padding: 15px;">
-                {% for message in messages %}
-
-                    <div class = "alert" id = "div_flash"> {{ message }} </div>
-                    <input type="button" value = &#10006 onclick="removeFlash()" style = "float: right">
-
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %} #}
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -89,10 +75,6 @@ setTimeout(function() {
 </script>
 
     {% block content %} {% endblock %}
-
-    {# <footer>
-        <p> Ezekiel M. Her <br> Copyright *Copyright symobol* 025 | Powered by Flask </p>
-    </footer> #}
 
 </body>
 </html>

@@ -13,7 +13,7 @@
         <th>Administrator</th>
         {# <th>Remove User</th> #}
     </tr>
-    {% for user in users %} <!-- What is going on here? Fix -->
+    {% for user in users %} 
     <tr>
         <td>{{ user.UserId }}</td>
         <td>{{ user.UserName }}</td>
@@ -21,7 +21,7 @@
         {# <td>
             <adminDelete>
                 <form method = "POST" action = "{{ url_for('admin_deleteUser', id = user.UserId) }}">
-                    <input name = "UserId" type = "hidden" value = "{{ user.UserId }}"> <!-- What does this line do? -->
+                    <input name = "UserId" type = "hidden" value = "{{ user.UserId }}"> 
                     <button type = "submit"> Delete User </button>
                 </form>           
             </adminDelete>

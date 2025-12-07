@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <h2> Your Blog </h2>
+    <h2> Your Tome </h2>
 
     <h1> {{ new_blog.blogTitle }} </h1>
 
@@ -10,8 +10,8 @@
     <p> Book: {{ new_blog.Book }} </p>
     <p> Book Author: {{ new_blog.BookAuthor if new_blog.BookAuthor else "No Author provided."}} </p>
     <p> {{ new_blog.InitialComment }} </p> 
-    <p> Posted at: {{ new_blog.PostTime }}  </p> 
+    <p> Posted at: {{ new_blog.PostTime.strftime('%B %d, %Y at %I:%M %p')  }}  </p> 
 
-{# Solve Repeat Issue #}
+    <a href=" {{url_for('home_blogs') }} "> Go to all blogs </a>
 
 {% endblock %}

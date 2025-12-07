@@ -1,5 +1,6 @@
 body {
     font-family: Georgia, 'Times New Roman', Times, serif;
+    text-align: center;
 }
 
 /* Denote special text */
@@ -45,14 +46,6 @@ body {
     color: black;
 }
 
-/* Footer */
-/* footer {
-    text-align: center;
-    padding: 3px;
-    background-color: darkolivegreen;
-    color: white;
-    
-} */
 
 /* Base text styling */
 h1 {color: darkgreen;}
